@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const commentSchema = require('./comment')
 
 const gameSchema = new mongoose.Schema(
 	{
@@ -18,6 +19,7 @@ const gameSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
+		comments: [commentSchema],
 		owner: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'User',
