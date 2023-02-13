@@ -1,12 +1,20 @@
 const mongoose = require('mongoose')
 
-const exampleSchema = new mongoose.Schema(
+const gameSchema = new mongoose.Schema(
 	{
 		title: {
 			type: String,
 			required: true,
 		},
-		text: {
+		description: {
+			type: String,
+			required: true,
+		},
+		genre: {
+			type: String,
+			required: true,
+		},
+		platform: {
 			type: String,
 			required: true,
 		},
@@ -21,4 +29,4 @@ const exampleSchema = new mongoose.Schema(
 	}
 )
 
-module.exports = mongoose.model('Example', exampleSchema)
+module.exports = mongoose.model('Game', gameSchema)
