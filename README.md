@@ -58,10 +58,6 @@
 | PATCH  | `/comments/:gameId/:commentId` | `comments#update` |
 | DELETE | `/commments/:gameId/:commentId`| `comments#delete` |
 
-## WireFrames / ScreenShots
-
-![TeamProject1](https://user-images.githubusercontent.com/112126759/218285135-e84952b9-af2e-4a83-8953-be54a130adb4.png)
-
 ## Entity Relationship Diagrams (ERDs)
 
 <img width="816" alt="Screen Shot 2023-02-12 at 1 34 54 PM" src="https://user-images.githubusercontent.com/85146023/218333580-4665722c-bc50-4dd0-a6ea-eab8c12321bb.png">
