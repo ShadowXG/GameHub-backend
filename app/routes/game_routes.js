@@ -3,6 +3,9 @@ const express = require('express')
 // Passport docs: http://www.passportjs.org/docs/
 const passport = require('passport')
 
+// get our env file for the api
+require('dotenv').config()
+
 // pull in Mongoose model for games
 const Game = require('../models/game')
 
@@ -19,6 +22,7 @@ const requireOwnership = customErrors.requireOwnership
 // this is middleware that will remove blank fields from `req.body`, e.g.
 // { game: { title: '', text: 'foo' } } -> { game: { text: 'foo' } }
 const removeBlanks = require('../../lib/remove_blank_fields')
+const { default: axios } = require('axios')
 // passing this as a second argument to `router.<verb>` will make it
 // so that a token MUST be passed for that route to be available
 // it will also set `req.user`
@@ -45,30 +49,40 @@ router.get('/games', (req, res, next) => {
 
 // SHOW
 // GET /games/5a7db6c74d55bc51bdf39793
-router.get('/games/:id', (req, res, next) => {
+router.get('/games/:id', async (req, res, next) => {
 	// req.params.id will be set based on the `:id` in the route
 	Game.findById(req.params.id)
 		.then(handle404)
 		// if `findById` is succesful, respond with 200 and "game" JSON
-		.then((game) => res.status(200).json({ game: game.toObject() }))
+		.then(async game => {
+			////////// The KEY from .env might not work because it has 2 = signs /////////
+			const gameInfo = await axios(`${process.env.RAWG_URL}${game.title}?${process.env.KEY}`)
+			console.log(gameInfo)
+			res.status(200).json({ game: game.toObject() })
+		})
 		// if an error occurs, pass it to the handler
 		.catch(next)
 })
 
 // CREATE
 // POST /games
-router.post('/games', requireToken, (req, res, next) => {
+router.post('/games', requireToken, async (req, res, next) => {
 	// set owner of new game to be current user
 	req.body.game.owner = req.user.id
 
-	EGamecreate(req.body.game)
-		// respond to succesful `create` with status 201 and JSON of new "game"
-		.then((game) => {
-			res.status(201).json({ game: game.toObject() })
+	await axios(`${process.env.RAWG_URL}${req.body.title}?${process.env.KEY}`)
+		.then(handle404)
+		.then(() => {
+			Game.create(req.body.game)
+				// respond to succesful `create` with status 201 and JSON of new "game"
+				.then(game => {
+					res.status(201).json({ game: game.toObject() })
+				})
+				// if an error occurs, pass it off to our error handler
+				// the error handler needs the error message and the `res` object so that it
+				// can send an error message back to the client
+				.catch(next)
 		})
-		// if an error occurs, pass it off to our error handler
-		// the error handler needs the error message and the `res` object so that it
-		// can send an error message back to the client
 		.catch(next)
 })
 
