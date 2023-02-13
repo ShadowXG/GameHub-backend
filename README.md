@@ -1,6 +1,6 @@
-# Team Project 1
+# GameHub
 
-(Team Project 1) is an online database of information relating to video games.
+GameHub is an online database of information relating to video games.
 
 ## Technologies Used
 
