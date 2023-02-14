@@ -13,14 +13,14 @@ const gameSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
-		genre: {
+		genre: [{
 			type: String,
 			required: true,
-		},
-		platform: {
+		}],
+		platform: [{
 			type: String,
 			required: true,
-		},
+		}],
 		favorites: [favoriteSchema],
 		comments: [commentSchema],
 		owner: {

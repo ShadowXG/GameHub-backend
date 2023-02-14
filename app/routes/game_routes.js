@@ -67,20 +67,32 @@ router.get('/games/:id', async (req, res, next) => {
 // CREATE
 // POST /games
 router.post('/games', requireToken, async (req, res, next) => {
+	let input = req.body
 	// set owner of new game to be current user
-	req.body.game.owner = req.user.id
-	let gameTitle = req.body.game.title
+	input.game.owner = req.user.id
+	let gameTitle = input.game.title
 	console.log(gameTitle)
+	// check to see if the user input a game with a space if so replace the space with a -
+	// this is to adhere to the way the api searches for a game
 	if (gameTitle.includes(" ")) {
 		gameTitle = gameTitle.replace(/ /g, "-");
 	}
-	console.log(gameTitle)
 
 	await axios(`${process.env.RAWG_URL}${gameTitle}?key=${process.env.KEY}`)
 		.then(handle404)
 		.then(game => {
-			console.log(game.data)
-			Game.create(req.body.game)
+			// sets the description
+			input.game.description = game.data.description
+			// sets the genre
+			const genres = game.data.genres
+			const genrenames = genres.map(genre => genre.name)
+			input.game.genre = genrenames
+			// sets the platform
+			const platforms = game.data.parent_platforms
+			const gamePlatforms = platforms.map(item => item.platform.name)
+			input.game.platform = gamePlatforms
+			// finally create the game
+			Game.create(input.game)
 				// respond to succesful `create` with status 201 and JSON of new "game"
 				.then(game => {
 					res.status(201).json({ game: game.toObject() })
