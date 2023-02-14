@@ -69,10 +69,17 @@ router.get('/games/:id', async (req, res, next) => {
 router.post('/games', requireToken, async (req, res, next) => {
 	// set owner of new game to be current user
 	req.body.game.owner = req.user.id
+	let gameTitle = req.body.game.title
+	console.log(gameTitle)
+	if (gameTitle.includes(" ")) {
+		gameTitle = gameTitle.replace(/ /g, "-");
+	}
+	console.log(gameTitle)
 
-	await axios(`${process.env.RAWG_URL}${req.body.title}?${process.env.KEY}`)
+	await axios(`${process.env.RAWG_URL}${gameTitle}?key=${process.env.KEY}`)
 		.then(handle404)
-		.then(() => {
+		.then(game => {
+			console.log(game.data)
 			Game.create(req.body.game)
 				// respond to succesful `create` with status 201 and JSON of new "game"
 				.then(game => {
@@ -83,6 +90,7 @@ router.post('/games', requireToken, async (req, res, next) => {
 				// can send an error message back to the client
 				.catch(next)
 		})
+		// .then(game => res.status(201).json({ game: game.toObject() }))
 		.catch(next)
 })
 
