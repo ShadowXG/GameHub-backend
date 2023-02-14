@@ -32,7 +32,7 @@ const router = express.Router()
 /////////////////////
 
 // GET
-router.get('/:gameId', requireToken, (req, res, next) => {
+router.get('/games/:gameId', requireToken, (req, res, next) => {
     const gameId = req.params.gameId
     req.body.favorites.owner = req.user.id
     const theFavorite = req.body
@@ -47,7 +47,7 @@ router.get('/:gameId', requireToken, (req, res, next) => {
 })
 
 // DELETE
-router.delete('/:gameId/:favId', requireToken, (req, res, next) => {
+router.delete('/games/:gameId/:favId', requireToken, (req, res, next) => {
     const { gameId, favId } = req.params
     Game.findById(gameId)
         .then(handle404)
