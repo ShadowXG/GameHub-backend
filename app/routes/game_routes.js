@@ -49,15 +49,12 @@ router.get('/games', (req, res, next) => {
 
 // SHOW
 // GET /games/5a7db6c74d55bc51bdf39793
-router.get('/games/:id', async (req, res, next) => {
+router.get('/games/:id', (req, res, next) => {
 	// req.params.id will be set based on the `:id` in the route
 	Game.findById(req.params.id)
 		.then(handle404)
 		// if `findById` is succesful, respond with 200 and "game" JSON
-		.then(async game => {
-			////////// The KEY from .env might not work because it has 2 = signs /////////
-			const gameInfo = await axios(`${process.env.RAWG_URL}${game.title}?${process.env.KEY}`)
-			console.log(gameInfo)
+		.then(game => {
 			res.status(200).json({ game: game.toObject() })
 		})
 		// if an error occurs, pass it to the handler
