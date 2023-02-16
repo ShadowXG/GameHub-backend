@@ -3,85 +3,87 @@ const express = require('express')
 // Passport docs: http://www.passportjs.org/docs/
 const passport = require('passport')
 
-// pull in Mongoose model for games
+// pull in Mongoose model for examples
 const Game = require('../models/game')
 
-// this is a collection of methods that help us detect situations when we need
-// to throw a custom error
+// custom middleware
 const customErrors = require('../../lib/custom_errors')
-
-// we'll use this function to send 404 when non-existant document is requested
 const handle404 = customErrors.handle404
-// we'll use this function to send 401 when a user tries to modify a resource
-// that's owned by someone else
 const requireOwnership = customErrors.requireOwnership
-
-// this is middleware that will remove blank fields from `req.body`, e.g.
-// { game: { title: '', text: 'foo' } } -> { game: { text: 'foo' } }
 const removeBlanks = require('../../lib/remove_blank_fields')
-// passing this as a second argument to `router.<verb>` will make it
-// so that a token MUST be passed for that route to be available
-// it will also set `req.user`
 const requireToken = passport.authenticate('bearer', { session: false })
 
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
 
-/////////////////////
-// ROUTES ///////////
-/////////////////////
+// ROUTES
 
-// CREATE
-router.post('/games/:gameId', requireToken, (req, res, next) => {
+// Create
+router.post('/comments/:gameId', (req, res, next) => {
+    const comment = req.body.comment
     const gameId = req.params.gameId
-    // if we have errors, console.log this below 
-    req.body.comment.author = req.user.id
-    const theComment = req.body
     Game.findById(gameId)
         .then(handle404)
         .then(game => {
-            game.comments.push(theComment)
+            console.log('the game: ', game)
+            console.log('the comment: ', comment)
+            game.comments.push(comment)
+
             return game.save()
         })
+        .then(game => res.status(201).json({ game: game }))
+        .catch(next)
+})
+
+// PATCH -> update a comment
+// PATCH /comments/:gameId/:commentId
+router.patch('/comments/:gameId/:commentId', requireToken, removeBlanks, (req, res, next) => {
+    const gameId = req.params.gameId
+    const commentId = req.params.commentId
+
+    // find our game
+    Game.findById(gameId)
+        .then(handle404)
         .then(game => {
-            res.redirect(`/games/${game.id}`)
+            // single out the comment
+            const theComment = game.comments.id(commentId)
+            // make sure the user is the game's owner
+            requireOwnership(req, game)
+            // update accordingly
+            theComment.set(req.body.comment)
+
+            return game.save()
         })
+        // send a status
         .then(() => res.sendStatus(204))
         .catch(next)
 })
 
-// UPDATE
-router.patch('/games/:gameId/:commId', requireToken, (req, res, next) => {
-    const { gameId, commId } = req.params
-    Game.findById(gameId)
-        .then(handle404)
-        .then(game => {
-            const theComment = game.comments.id(commId)
-            // if we have an error, we look here
-            requireOwnership(req, game.comments.author)
-            theComment.title = req.body.title
-            theComment.note = req.body.note
-            game.markModified('comments')
-            game.save()
-        })
-        .then(() => res.sendStatus(204))
-        .catch(next)
-})
+// DELETE -> destroy a comment
+// DELETE /comments/:gameId/:commentId
+router.delete('/comments/:gameId/:commentId', requireToken, (req, res, next) => {
+    const gameId = req.params.gameId
+    const commentId = req.params.commentId
 
-// DELETE
-router.delete('/games/:gameId/:commId', requireToken, (req, res, next) => {
-    const { gameId, commId } = req.params
+    // find the game
     Game.findById(gameId)
         .then(handle404)
+        // grab the specific comment using it's id
         .then(game => {
-            const theComment = game.comments.id(commId)
-            // if we have an error, we look here
-            requireOwnership(req, game.comments.author)
+            // isolate the comment
+            const theComment = game.comments.id(commentId)
+            // make sure the user is the owner of the game
+            requireOwnership(req, game)
+            // call remove on our comment subdoc
             theComment.remove()
+            // return the saved game
             return game.save()
         })
+        // send a response
         .then(() => res.sendStatus(204))
+        // pass errors to our error handler (using next)
         .catch(next)
 })
 
-module.exports = router 
+// export our router
+module.exports = router
