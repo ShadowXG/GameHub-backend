@@ -76,7 +76,7 @@ curl --include --request POST http://localhost:8000/sign-up \
   --header "Content-Type: application/json" \
   --data '{
     "credentials": {
-      "email": "an@example.email",
+      "username": "an@example.username",
       "password": "an example password",
       "password_confirmation": "an example password"
     }
@@ -96,7 +96,7 @@ Content-Type: application/json; charset=utf-8
 {
   "user": {
     "id": 1,
-    "email": "an@example.email"
+    "username": "an@example.username"
   }
 }
 ```
@@ -110,7 +110,7 @@ curl --include --request POST http://localhost:8000/sign-in \
   --header "Content-Type: application/json" \
   --data '{
     "credentials": {
-      "email": "an@example.email",
+      "username": "an@example.username",
       "password": "an example password"
     }
   }'
@@ -129,7 +129,7 @@ Content-Type: application/json; charset=utf-8
 {
   "user": {
     "id": 1,
-    "email": "an@example.email",
+    "username": "an@example.username",
     "token": "33ad6372f795694b333ec5f329ebeaaa"
   }
 }

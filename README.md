@@ -11,11 +11,11 @@ GameHub is an online database of information relating to video games.
 
 ## MVP User Stories
 
-- As an unregistered user, I would like to sign up with email and password.
+- As an unregistered user, I would like to sign up with username and password.
 - As an unregistered user, I would like to see all the games on the game index
 - As an unregistered user, I would like to view all other users' games on the game index.
 - As an unregistered user, I want the ability to read more details of individual games.
-- As a registered user, I would like to sign in with email and password.
+- As a registered user, I would like to sign in with username and password.
 - As a signed in user, I would like to change password.
 - As a signed in user, I would like to sign out.
 - As a signed in user, I would like to add a video game to the game index.

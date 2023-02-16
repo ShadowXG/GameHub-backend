@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 
 const commentSchema = require('./comment')
-const favoriteSchema = require('./favorite')
 
 const gameSchema = new mongoose.Schema(
 	{
@@ -21,7 +20,6 @@ const gameSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		}],
-		favorites: [favoriteSchema],
 		comments: [commentSchema],
 		owner: {
 			type: mongoose.Schema.Types.ObjectId,

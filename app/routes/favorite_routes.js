@@ -4,7 +4,7 @@ const express = require('express')
 const passport = require('passport')
 
 // pull in Mongoose model for games
-const Game = require('../models/game')
+const Favorite = require('../models/favorite')
 
 // this is a collection of methods that help us detect situations when we need
 // to throw a custom error
@@ -31,32 +31,48 @@ const router = express.Router()
 // ROUTES ///////////
 /////////////////////
 
-// GET
-router.get('/games/:gameId', requireToken, (req, res, next) => {
+// POST
+router.post('/favorites/:gameId', requireToken, (req, res, next) => {
     const gameId = req.params.gameId
-    req.body.favorites.owner = req.user.id
-    const theFavorite = req.body
-    Game.findById(gameId)
-        .then(handle404)
-        .then(game => {
-            game.favorites.push(theFavorite)
-            return game.save()
+    const userId = req.user._id
+    Favorite.create({ game: gameId, owner: userId})
+        .then(favorite => {
+            console.log(favorite)
+            res.status(201).json({ favorite: favorite.toObject() })
         })
-        .then(() => res.sendStatus(204))
         .catch(next)
 })
 
+// GET
+// show all the favorites for a user
+router.get('/favorites', requireToken, (req, res, next) => {
+    // console.log(req.user)
+    const userId = req.user._id
+    Favorite.find({ owner: userId})
+        .populate('game')
+        .populate('owner')
+        .then((favorites) => {
+            console.log(req)
+            // requireOwnership(req, userId)
+            return favorites.map((favorite) => favorite.toObject())
+        })
+        .then((favorites) => {
+            // return favorites.map((favorite) => favorite.toObject())
+            res.status(201).json({ favorites: favorites })
+        })
+        // .then(() => res.sendStatus(204))
+        .catch(next)
+  })
+
 // DELETE
-router.delete('/games/:gameId/:favId', requireToken, (req, res, next) => {
-    const { gameId, favId } = req.params
-    Game.findById(gameId)
+router.delete('/favorites/:favId', requireToken, (req, res, next) => {
+    const favId = req.params
+    Favorite.findById(favId)
         .then(handle404)
-        .then(game => {
-            const theFavorite = game.favorites.id(favId)
+        .then(favorite => {
             // if we have an error, we look here
-            requireOwnership(req, game.favorites.owner)
-            theFavorite.remove()
-            return game.save()
+            requireOwnership(req, favorite)
+            favorite.deleteOne()
         })
         .then(() => res.sendStatus(204))
         .catch(next)
