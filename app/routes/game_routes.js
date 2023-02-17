@@ -81,7 +81,7 @@ router.post('/games', requireToken, async (req, res, next) => {
 		.then(handle404)
 		.then(game => {
 			// sets the description
-			input.game.description = game.data.description
+			input.game.description = game.data.description.replace(/<\/?(p|br)[^>]*>/g, "")
 			// sets the genre
 			const genres = game.data.genres
 			const genrenames = genres.map(genre => genre.name)
