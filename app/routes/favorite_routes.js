@@ -52,7 +52,6 @@ router.get('/favorites', requireToken, (req, res, next) => {
         .populate('game')
         .populate('owner')
         .then((favorites) => {
-            console.log(req)
             // requireOwnership(req, userId)
             return favorites.map((favorite) => favorite.toObject())
         })
@@ -65,11 +64,11 @@ router.get('/favorites', requireToken, (req, res, next) => {
   })
 
 // DELETE
-router.delete('/favorites/:favId', requireToken, (req, res, next) => {
-    const favId = req.params
-    Favorite.findById(favId)
+router.delete('/favorites/:id', requireToken, (req, res, next) => {
+    Favorite.findById(req.params.id)
         .then(handle404)
-        .then(favorite => {
+        .then((favorite) => {
+            console.log('favorite', favorite)
             // if we have an error, we look here
             requireOwnership(req, favorite)
             favorite.deleteOne()
