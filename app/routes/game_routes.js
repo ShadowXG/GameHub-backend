@@ -84,7 +84,7 @@ router.post('/games', requireToken, async (req, res, next) => {
 			// set the picture
 			input.game.picture = game.data.background_image
 			// sets the description
-			input.game.description = game.data.description.replace(/<\/?(p|br|hr|li|ul)[^>]*>/g, "").replace(/&#39;/g, "'")
+			input.game.description = game.data.description.replace(/<\/?(p|br|hr|li|ul|h2|h3|h4|h5)[^>]*>/g, "").replace(/&#39;/g, "'")
 			// sets the genre
 			const genres = game.data.genres
 			const genrenames = genres.map(genre => genre.name)
