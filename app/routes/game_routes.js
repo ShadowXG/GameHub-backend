@@ -80,8 +80,11 @@ router.post('/games', requireToken, async (req, res, next) => {
 	await axios(`${process.env.RAWG_URL}${gameTitle}?key=${process.env.KEY}`)
 		.then(handle404)
 		.then(game => {
+			console.log(game.data)
+			// set the picture
+			input.game.picture = game.data.background_image
 			// sets the description
-			input.game.description = game.data.description.replace(/<\/?(p|br)[^>]*>/g, "").replace(/&#39;/g, "'")
+			input.game.description = game.data.description.replace(/<\/?(p|br|hr|li|ul)[^>]*>/g, "").replace(/&#39;/g, "'")
 			// sets the genre
 			const genres = game.data.genres
 			const genrenames = genres.map(genre => genre.name)
